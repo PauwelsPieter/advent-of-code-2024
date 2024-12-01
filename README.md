@@ -11,5 +11,5 @@ pnpm i
 ## Utilization
 
 ```
-pnpm start --day={1-25}
+pnpm start --day={1-25} --puzzle={1-2}
 ```

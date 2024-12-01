@@ -9,16 +9,24 @@ const args = await yargs(hideBin(process.argv))
 		choices: Array.from({ length: 25 }, (_, i) => i + 1),
 		demandOption: true,
 	})
+	.option('puzzle', {
+		alias: 'p',
+		type: 'number',
+		description: 'The number of the puzzle on the given day',
+		choices: [1, 2],
+		demandOption: true,
+	})
 	.help().argv
 
 try {
 	const solution = await import(`./solutions/day${args.day}.js`)
+	const functionName = `puzzle${args.puzzle}`
 
-	if (typeof solution.default === 'function') {
-		await solution.default()
+	if (typeof solution[functionName] === 'function') {
+		await solution[functionName]()
 	} else {
 		console.error(
-			`The solution for day ${args.day} does not export a default function.`,
+			`The puzzle ${args.puzzle} solution for day ${args.day} does not exists.`,
 		)
 	}
 } catch (error) {
