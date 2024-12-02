@@ -30,5 +30,6 @@ try {
 		)
 	}
 } catch (error) {
+	console.log(error)
 	console.error(`Solution for day ${args.day} does not yet exists.`)
 }
