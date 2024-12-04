@@ -1,7 +1,7 @@
 import * as fs from 'node:fs'
 import * as readline from 'node:readline'
 
-// Time complexity:
+// Time complexity: O(n^2)
 export async function puzzle1() {
 	const fileStream = fs.createReadStream('./input/day4.txt')
 	const rl = readline.createInterface({
@@ -88,5 +88,43 @@ export async function puzzle1() {
 	})
 }
 
-// Time complexity:
-export async function puzzle2() {}
+// Time complexity: O(n)
+export async function puzzle2() {
+	const fileStream = fs.createReadStream('./input/day4.txt')
+	const rl = readline.createInterface({
+		input: fileStream,
+		output: process.stdout,
+		terminal: false,
+	})
+
+	const input: string[][] = []
+
+	rl.on('line', (lineString) => {
+		input.push(lineString.split(''))
+	})
+
+	rl.on('close', () => {
+		let amount = 0
+
+		const rows = input.length
+		const cols = input[0].length
+
+		for (let row = 1; row < rows - 1; row++) {
+			for (let col = 1; col < cols - 1; col++) {
+				const lToRDiagonalString =
+					input[row - 1][col - 1] + input[row][col] + input[row + 1][col + 1]
+				const rToLDiagonalString =
+					input[row - 1][col + 1] + input[row][col] + input[row + 1][col - 1]
+
+				if (
+					(lToRDiagonalString === 'MAS' || lToRDiagonalString === 'SAM') &&
+					(rToLDiagonalString === 'MAS' || rToLDiagonalString === 'SAM')
+				) {
+					amount++
+				}
+			}
+		}
+
+		console.log(`Amount of X-MAS occurrences: ${amount}`)
+	})
+}
