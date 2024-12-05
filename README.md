@@ -13,3 +13,7 @@ pnpm i
 ```
 pnpm start --day={1-25} --puzzle={1-2}
 ```
+
+## About me
+
+#### [🌐 Portfolio website](https://pieterpauwels.me/)
