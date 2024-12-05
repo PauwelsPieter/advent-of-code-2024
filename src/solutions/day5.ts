@@ -44,21 +44,21 @@ export async function puzzle2() {
 		terminal: false,
 	})
 
-	const pageOrderingRules = new Map<number, Set<number>>()
+	const dependencies = new Map<number, Set<number>>()
 	const invalidUpdates: number[][] = []
 
 	rl.on('line', (lineString) => {
 		if (lineString.includes('|')) {
-			const pageOrderingRule = lineString.split('|').map(Number)
+			const dependency = lineString.split('|').map(Number)
 
-			const currentRules = pageOrderingRules.get(pageOrderingRule[0]) ?? new Set<number>()
-			currentRules.add(pageOrderingRule[1])
+			const currentRules = dependencies.get(dependency[0]) ?? new Set<number>()
+			currentRules.add(dependency[1])
 
-			pageOrderingRules.set(pageOrderingRule[0], currentRules)
+			dependencies.set(dependency[0], currentRules)
 		}
 		if (lineString.includes(',')) {
 			const update = lineString.split(',').map(Number)
-			if (!isUpdateValid(update, pageOrderingRules)){ 
+			if (!isUpdateValid(update, dependencies)){ 
 				invalidUpdates.push(update)
 			}
 		}
@@ -68,30 +68,7 @@ export async function puzzle2() {
 		const sortedUpdates: number[][] = []
 
 		for (const update of invalidUpdates) {
-			let i = 0
-			let seen = new Set<number>()
-			
-			while (i < update.length) {
-				const page = update[i]
-				
-				const rules = pageOrderingRules.get(page) ?? new Set<number>()
-				if (rules.size > 0) {
-					for (let j = 0; j < i; j++) {
-						if (rules.has(update[j])) {
-							update.splice(j, 0, page)
-							update.splice(i+1, 1)
-							i = -1
-							seen.clear()
-							break
-						}
-					}
-				}
-				
-				seen.add(page)
-				i++
-			}
-
-			sortedUpdates.push(update)
+			sortedUpdates.push(topologicalSortNodes(update, dependencies))
 		}
 
 		console.log(`Sum of middle page numbers of sorted updates: ${getSumOfMiddleValues(sortedUpdates)}`)
@@ -123,4 +100,52 @@ function getSumOfMiddleValues(updates: number[][]): number {
 	}
 
 	return sumOfMiddlePages
+}
+
+// Kahn's algorithm = O(nodes + edges)
+function topologicalSortNodes(nodes: number[], dependencies: Map<number, Set<number>>): number[] {
+	const queue: number[] = [] // Node's that have no dependencies (= incoming edges)
+	const inDegree = new Map<number, number>() // Track the number of incoming edges for each node
+
+	// Initialize in-degree counts for each node
+    for (const node of nodes) {
+        inDegree.set(node, 0)
+    }
+
+	// Populate in-degree counts based on dependencies
+    for (const [currentNode, dependentNodes] of dependencies) {
+        for (const dependent of dependentNodes) {
+			if (inDegree.has(dependent) && nodes.some(node => node === currentNode)) {
+				inDegree.set(dependent, (inDegree.get(dependent) as number) + 1)
+			}
+        }
+    }
+
+	// Add nodes with no dependencies to the queue
+	for (const [node, degree] of inDegree.entries()) {
+		if (degree === 0) {
+			queue.push(node)
+		}
+	}
+
+	const sorted: number[] = []
+	while(queue.length > 0) {
+		const node = queue.shift() as number
+		sorted.push(node)
+
+		// Decrement in-degree for dependent nodes and add them to the queue when they've no more dependencies
+		const dependents = dependencies.get(node) || new Set<number>()
+		for (const dependent of dependents) {
+			inDegree.set(dependent, (inDegree.get(dependent) ?? 0) - 1)
+			if (inDegree.get(dependent) === 0) {
+				queue.push(dependent)
+			}
+		}
+	}
+
+	if (sorted.length !== nodes.length) {
+		throw 'Graph contains a cycle'
+	}
+
+	return sorted
 }
