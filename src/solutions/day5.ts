@@ -17,21 +17,24 @@ export async function puzzle1() {
 		if (lineString.includes('|')) {
 			const pageOrderingRule = lineString.split('|').map(Number)
 
-			const currentRules = pageOrderingRules.get(pageOrderingRule[0]) ?? new Set<number>()
+			const currentRules =
+				pageOrderingRules.get(pageOrderingRule[0]) ?? new Set<number>()
 			currentRules.add(pageOrderingRule[1])
 
 			pageOrderingRules.set(pageOrderingRule[0], currentRules)
 		}
 		if (lineString.includes(',')) {
 			const update = lineString.split(',').map(Number)
-			if (isUpdateValid(update, pageOrderingRules)){ 
+			if (isUpdateValid(update, pageOrderingRules)) {
 				validUpdates.push(update)
 			}
 		}
 	})
 
 	rl.on('close', () => {
-		console.log(`Sum of middle page numbers of valid updates: ${getSumOfMiddleValues(validUpdates)}`)
+		console.log(
+			`Sum of middle page numbers of valid updates: ${getSumOfMiddleValues(validUpdates)}`,
+		)
 	})
 }
 
@@ -58,7 +61,7 @@ export async function puzzle2() {
 		}
 		if (lineString.includes(',')) {
 			const update = lineString.split(',').map(Number)
-			if (!isUpdateValid(update, dependencies)){ 
+			if (!isUpdateValid(update, dependencies)) {
 				invalidUpdates.push(update)
 			}
 		}
@@ -71,11 +74,16 @@ export async function puzzle2() {
 			sortedUpdates.push(topologicalSortNodes(update, dependencies))
 		}
 
-		console.log(`Sum of middle page numbers of sorted updates: ${getSumOfMiddleValues(sortedUpdates)}`)
+		console.log(
+			`Sum of middle page numbers of sorted updates: ${getSumOfMiddleValues(sortedUpdates)}`,
+		)
 	})
 }
 
-function isUpdateValid(update: number[], rules: Map<number, Set<number>>): boolean {
+function isUpdateValid(
+	update: number[],
+	rules: Map<number, Set<number>>,
+): boolean {
 	const seenPages = new Set<number>()
 
 	for (const page of update) {
@@ -103,23 +111,29 @@ function getSumOfMiddleValues(updates: number[][]): number {
 }
 
 // Kahn's algorithm = O(nodes + edges)
-function topologicalSortNodes(nodes: number[], dependencies: Map<number, Set<number>>): number[] {
+function topologicalSortNodes(
+	nodes: number[],
+	dependencies: Map<number, Set<number>>,
+): number[] {
 	const queue: number[] = [] // Node's that have no dependencies (= incoming edges)
 	const inDegree = new Map<number, number>() // Track the number of incoming edges for each node
 
 	// Initialize in-degree counts for each node
-    for (const node of nodes) {
-        inDegree.set(node, 0)
-    }
+	for (const node of nodes) {
+		inDegree.set(node, 0)
+	}
 
 	// Populate in-degree counts based on dependencies
-    for (const [currentNode, dependentNodes] of dependencies) {
-        for (const dependent of dependentNodes) {
-			if (inDegree.has(dependent) && nodes.some(node => node === currentNode)) {
+	for (const [currentNode, dependentNodes] of dependencies) {
+		for (const dependent of dependentNodes) {
+			if (
+				inDegree.has(dependent) &&
+				nodes.some((node) => node === currentNode)
+			) {
 				inDegree.set(dependent, (inDegree.get(dependent) as number) + 1)
 			}
-        }
-    }
+		}
+	}
 
 	// Add nodes with no dependencies to the queue
 	for (const [node, degree] of inDegree.entries()) {
@@ -129,7 +143,7 @@ function topologicalSortNodes(nodes: number[], dependencies: Map<number, Set<num
 	}
 
 	const sorted: number[] = []
-	while(queue.length > 0) {
+	while (queue.length > 0) {
 		const node = queue.shift() as number
 		sorted.push(node)
 

@@ -43,10 +43,11 @@ export async function puzzle2() {
 
 		if (isSafe) {
 			safeReports++
-		}
-		else {
+		} else {
 			for (let i = 0; i < levels.length; i++) {
-				const levelsWithoutFaultyLevel = levels.filter((_, index) => index !== i)
+				const levelsWithoutFaultyLevel = levels.filter(
+					(_, index) => index !== i,
+				)
 				if (reportIsSafe(levelsWithoutFaultyLevel)[0]) {
 					safeReports++
 					return
@@ -61,13 +62,14 @@ export async function puzzle2() {
 }
 
 function reportIsSafe(levels: number[]): [boolean, number | null] {
-	const trend = Number(levels[0]) > Number(levels[1]) ? 'decreasing' : 'increasing'
+	const trend =
+		Number(levels[0]) > Number(levels[1]) ? 'decreasing' : 'increasing'
 
 	for (let i = 1; i < levels.length; i++) {
-		const prevLevel = Number(levels[i-1])
+		const prevLevel = Number(levels[i - 1])
 		const curLevel = Number(levels[i])
-		
-		const currentTrend = prevLevel > curLevel ? 'decreasing' : 'increasing'	
+
+		const currentTrend = prevLevel > curLevel ? 'decreasing' : 'increasing'
 		if (currentTrend !== trend) {
 			return [false, i]
 		}
