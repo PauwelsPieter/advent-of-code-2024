@@ -72,10 +72,14 @@ function isCorrectEquation(result: number, values: number[]): boolean {
 function isCorrectEquation2(result: number, values: number[]): boolean {
 	const addResult = values[0] + values[1]
 	const multiplyResult = values[0] * values[1]
-	const concatResult = Number(values[0].toString()+values[1].toString())
+	const concatResult = Number(values[0].toString() + values[1].toString())
 
 	if (values.length === 2) {
-		return addResult === result || multiplyResult === result || concatResult == result
+		return (
+			addResult === result ||
+			multiplyResult === result ||
+			concatResult === result
+		)
 	}
 
 	return (
