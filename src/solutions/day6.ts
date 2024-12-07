@@ -70,7 +70,7 @@ export async function puzzle1() {
 	})
 }
 
-// Time complexity:
+// Time complexity: O(n^2)
 export async function puzzle2() {
 	const fileStream = fs.createReadStream('./input/day6.txt')
 	const rl = readline.createInterface({
