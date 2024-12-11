@@ -12,7 +12,7 @@ export async function puzzle1() {
 		terminal: false,
 	})
 
-	const trialheads = new Set<string>()
+	const trailheads = new Set<string>()
 	let y = 0
 
 	rl.on('line', (line) => {
@@ -22,7 +22,7 @@ export async function puzzle1() {
 			map.set(`${x},${y}`, heights[x])
 
 			if (heights[x] === 0) {
-				trialheads.add(`${x},${y}`)
+				trailheads.add(`${x},${y}`)
 			}
 		}
 
@@ -31,17 +31,51 @@ export async function puzzle1() {
 
 	rl.on('close', () => {
 		let total = 0
-		for (const trialhead of trialheads) {
-			const location = trialhead.split(',').map(Number) as [number, number]
+		for (const trailhead of trailheads) {
+			const location = trailhead.split(',').map(Number) as [number, number]
 			total += findReachableTops(0, location).size
 		}
 
-		console.log(`Sum of trialhead scores: ${total}`)
+		console.log(`Sum of trailhead scores: ${total}`)
 	})
 }
 
 // Time complexity:
-export async function puzzle2() {}
+export async function puzzle2() {
+	const fileStream = fs.createReadStream('./input/day10.txt')
+	const rl = readline.createInterface({
+		input: fileStream,
+		output: process.stdout,
+		terminal: false,
+	})
+
+	const trailheads = new Set<string>()
+	let y = 0
+
+	rl.on('line', (line) => {
+		const heights = line.split('').map(Number)
+
+		for (let x = 0; x < line.length; x++) {
+			map.set(`${x},${y}`, heights[x])
+
+			if (heights[x] === 0) {
+				trailheads.add(`${x},${y}`)
+			}
+		}
+
+		y += 1
+	})
+
+	rl.on('close', () => {
+		let total = 0
+		for (const trailhead of trailheads) {
+			const location = trailhead.split(',').map(Number) as [number, number]
+			total += findTrailheadRating(0, location)
+		}
+
+		console.log(`Sum of trailhead ratings: ${total}`)
+	})
+}
 
 function findReachableTops(
 	currentHeight: number,
@@ -96,4 +130,25 @@ function findPossibleSteps(
 	}
 
 	return locations
+}
+
+function findTrailheadRating(
+	currentHeight: number,
+	location: [number, number],
+): number {
+	if (currentHeight === 8) {
+		return findPossibleSteps(currentHeight, location).length
+	}
+
+	const possibleSteps = findPossibleSteps(currentHeight, location)
+
+	if (possibleSteps.length === 0) {
+		return 0
+	}
+
+	let total = 0
+	for (const step of possibleSteps) {
+		total += findTrailheadRating(currentHeight + 1, step)
+	}
+	return total
 }
