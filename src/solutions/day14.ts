@@ -63,8 +63,79 @@ export async function puzzle1() {
 	})
 }
 
+interface Robot {
+	position: {
+		x: number
+		y: number
+	}
+	velocity: {
+		x: number
+		y: number
+	}
+}
+
 // Time complexity:
-export async function puzzle2() {}
+export async function puzzle2() {
+	const fileStream = fs.createReadStream('./input/day14.txt')
+	const rl = readline.createInterface({
+		input: fileStream,
+		output: process.stdout,
+		terminal: false,
+	})
+
+	const robots: Robot[] = []
+
+	const maxX = 101
+	const maxY = 103
+
+	rl.on('line', (line) => {
+		const [px, py, vx, vy] = line.match(/-?\d+/g)?.map(Number) || []
+
+		robots.push({
+			position: {
+				x: px,
+				y: py,
+			},
+			velocity: {
+				x: vx,
+				y: vy,
+			},
+		})
+	})
+
+	rl.on('close', () => {
+		let seconds = 1
+
+		while (true) {
+			const positions = new Set<string>()
+
+			for (const robot of robots) {
+				const deltaX = robot.position.x + robot.velocity.x * seconds
+				const deltaY = robot.position.y + robot.velocity.y * seconds
+
+				let locationX = deltaX % maxX
+				let locationY = deltaY % maxY
+
+				if (locationX < 0) {
+					locationX = maxX + locationX
+				}
+				if (locationY < 0) {
+					locationY = maxY + locationY
+				}
+
+				positions.add(`${locationX},${locationY}`)
+			}
+
+			if (formsLine(positions)) {
+				printRobotConfiguration(positions, [maxX, maxY])
+				break
+			}
+			seconds++
+		}
+
+		console.log(`Solution found at second: ${seconds}`)
+	})
+}
 
 function determineQuadrant(
 	location: [number, number],
@@ -84,4 +155,40 @@ function determineQuadrant(
 	}
 
 	return null
+}
+
+function formsLine(robots: Set<string>, length = 10): boolean {
+	for (const robot of robots) {
+		const [x, y] = robot.split(',').map(Number)
+
+		for (let i = 1; i <= length; i++) {
+			if (!robots.has(`${x + i},${y + i}`)) {
+				break
+			}
+
+			if (i === length) {
+				console.log(`Line found at ${robot}`)
+				return true
+			}
+		}
+	}
+	return false
+}
+
+function printRobotConfiguration(
+	robots: Set<string>,
+	size: [number, number],
+): void {
+	for (let y = 0; y < size[1]; y++) {
+		let line = ''
+		for (let x = 0; x < size[0]; x++) {
+			if (robots.has(`${x},${y}`)) {
+				line += 'X'
+				continue
+			}
+
+			line += '.'
+		}
+		console.log(line)
+	}
 }
